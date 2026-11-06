@@ -27,3 +27,4 @@ output/*.json
 # Sistem operasi dan editor
 .DS_Store
 .vscode/
+.commandcode/
