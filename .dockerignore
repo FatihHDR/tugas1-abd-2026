@@ -1,0 +1,22 @@
+# Jangan salin artefak besar / VCS / cache ke dalam image Docker.
+.git
+.gitignore
+.venv
+venv
+env
+.commandcode
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Data besar dan keluaran analisis tidak ikut ke dalam image;
+# data diunduh di dalam container atau di-mount sebagai volume.
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+output/figures/*
+!output/figures/.gitkeep
+output/*.csv
+output/*.parquet
+output/*.json

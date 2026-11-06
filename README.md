@@ -1,42 +1,154 @@
 # Tugas 1: Eksplorasi dan Analisis Dataset Besar Indonesia
 
-Template untuk Tugas 1 mata kuliah Analisis Big Data. Setelah repository GitHub Classroom dibuat, ubah nama repository menjadi `tugas1-[username_github]`.
+**Nama:** Fatahillah Al-Fatih
+**NIM:** 202310370311132
+**Username GitHub:** FatihHDR
+**Mata Kuliah:** Analisis Big Data
+
+Analisis big data atas **cuaca per jam untuk 40 kota di 38 provinsi Indonesia** (2001-2024) bersumber dari **NASA POWER** (reanalisis MERRA-2). Proyek mencakup pengunduhan data, profiling, cleaning dan validasi, analisis temporal-spasial, enam visualisasi interaktif, serta lima insight analitik. Seluruh proses dapat dijalankan ulang dari nol dan direproduksi lewat Docker.
+
+## Ringkasan Cepat
+
+| Item | Nilai |
+|---|---|
+| Dataset | Cuaca per jam 40 kota Indonesia (NASA POWER / MERRA-2) |
+| Ukuran | **8.415.360 baris x 17 kolom** (memenuhi kriteria > 1 juta baris) |
+| Periode | 1 Januari 2001 - 31 Desember 2024 (waktu lokal / LST) |
+| Tools utama | Polars (lazy), DuckDB (SQL/`SUMMARIZE`), Plotly (interaktif) |
+| Keluaran | 3 notebook tereksekusi, 6 visualisasi interaktif, 5 insight |
 
 ## Milestone
 
-| Tahap | Target | Bukti yang dikumpulkan |
-|---|---|---|
-| Milestone 1 | Pertemuan 3 | Dataset >= 500 MB atau > 1 juta baris, `data/README.md`, dan `notebooks/01_data_profiling.ipynb` |
-| Milestone 2 | Pertemuan 5 | Cleaning dengan Polars dan profiling DuckDB `SUMMARIZE` |
-| Milestone 3 | Pertemuan 8 | Analisis temporal/ruang dan minimal 6 visualisasi interaktif |
-| Final | Pertemuan 10 | Minimal 5 insight, Dockerfile, dan dokumentasi akhir |
+| Tahap | Target | Bukti yang dikumpulkan | Status |
+|---|---|---|---|
+| Milestone 1 | Pertemuan 3 | Dataset >= 500 MB atau > 1 juta baris, `data/README.md`, dan `notebooks/01_data_profiling.ipynb` | Selesai |
+| Milestone 2 | Pertemuan 5 | Cleaning dengan Polars dan profiling DuckDB `SUMMARIZE` | Selesai |
+| Milestone 3 | Pertemuan 8 | Analisis temporal/ruang dan minimal 6 visualisasi interaktif | Selesai |
+| Final | Pertemuan 10 | Minimal 5 insight, Dockerfile, dan dokumentasi akhir | Selesai |
 
-## Output yang Diharapkan
+## Dataset
 
-Pada final submission, repository harus menghasilkan analisis yang dapat dijalankan ulang dari awal dan memuat:
+| Item | Isi |
+|---|---|
+| Nama | Cuaca per jam kota-kota Indonesia (NASA POWER / MERRA-2) |
+| Sumber | NASA POWER Project - https://power.larc.nasa.gov/ |
+| Endpoint | `https://power.larc.nasa.gov/api/temporal/hourly/point` |
+| Lisensi | Data terbuka NASA; bebas digunakan untuk penelitian/pendidikan dengan atribusi |
+| Ukuran | 8.415.360 baris, ~190 MB (Parquet) |
+| Periode | 2001-01-01 s.d. 2024-12-31, waktu lokal (LST) tiap kota |
+| Unit analisis | Satu observasi cuaca per jam untuk satu kota |
 
-- Dataset Indonesia yang terdokumentasi, berukuran minimal 500 MB atau lebih dari 1 juta baris, beserta instruksi unduhnya.
-- Notebook profiling, cleaning, serta EDA yang dapat dieksekusi berurutan.
-- Cleaning dan validasi data untuk missing values, duplikasi, outlier, serta aturan kualitas yang relevan dengan dataset.
-- Analisis temporal atau spasial, minimal 6 visualisasi interaktif dengan Plotly atau Altair, dan minimal 5 insight analitik yang didukung hasil analisis.
-- Environment yang dapat direproduksi melalui `Dockerfile`, `requirements.txt`, dan petunjuk eksekusi di README.
-- Riwayat commit bertahap yang menunjukkan proses kerja pada setiap milestone.
+Variabel per jam: `T2M`, `T2MDEW`, `RH2M`, `QV2M`, `PRECTOTCORR`, `PS`, `WS10M`, `WD10M`, `ALLSKY_SFC_SW_DWN`, `CLOUD_AMT`. Dokumentasi lengkap (skema kolom, cakupan kota, checksum, cara unduh) ada di **[`data/README.md`](data/README.md)**.
 
-## Kaitan dengan Materi Perkuliahan
+## Struktur Repository
 
-| Materi | Pertemuan | Penerapan pada Tugas 1 |
-|---|:---:|---|
-| Polars dan lazy evaluation | 2 | Profiling dan transformasi dataset besar dengan `scan_*`, expressions, dan pipeline efisien. |
-| DuckDB dan format data | 3 | Query analitik serta profiling dengan `SUMMARIZE`; gunakan Parquet bila sesuai. |
-| Data quality dan cleaning | 4 | Tangani missing values, duplikasi, outlier, dan validasi data. |
-| EDA dan visualisasi | 5 | Bangun visualisasi interaktif serta rumuskan insight analitik. |
-| Time series | 6 | Terapkan analisis pola waktu atau pola spasial yang relevan dengan dataset. |
-| Dask, NLP, dan ML | 7-9 | Opsional sebagai pengembangan jika relevan dengan skala dan pertanyaan analisis. |
-| Streamlit dan Docker | 10-11 | Dokumentasikan environment Docker; dashboard Streamlit bersifat opsional untuk Tugas 1. |
+```text
+.
+├── .dockerignore                 # mengecualikan data besar/.venv dari image
+├── .github/workflows/lint_check.yml
+├── data/
+│   ├── README.md                 # dokumentasi dataset + instruksi unduh + checksum
+│   ├── raw/                      # hasil unduhan (tidak di-commit)
+│   └── processed/                # data bersih (tidak di-commit)
+├── notebooks/
+│   ├── 01_data_profiling.ipynb   # Milestone 1: Polars lazy + DuckDB SUMMARIZE
+│   ├── 02_data_cleaning.ipynb    # Milestone 2: cleaning + validasi
+│   └── 03_eda_and_insights.ipynb # Milestone 3: temporal/spasial + 6 visualisasi + 5 insight
+├── output/figures/               # figur interaktif HTML (tidak di-commit)
+├── src/
+│   └── download_data.py          # skrip unduh dataset NASA POWER
+├── Dockerfile
+├── Makefile                      # orkestrasi pipeline (opsional)
+├── requirements.txt
+├── identitas.md
+└── README.md
+```
+
+## Cara Menjalankan Project
+
+### Opsi A - Docker (rekomendasi, terisolasi)
+
+```bash
+# 1. Bangun image
+docker build -t tugas1-bigdata .
+
+# 2. Jalankan container (mount folder proyek agar hasil tersimpan di host)
+docker run --rm -p 8888:8888 -v "$(pwd)":/home/jovyan/work tugas1-bigdata
+
+# 3. Buka JupyterLab di browser
+#    http://localhost:8888/lab
+```
+
+Di dalam JupyterLab (menu Terminal), jalankan pipeline berurutan:
+
+```bash
+python src/download_data.py
+jupyter nbconvert --to notebook --execute --inplace notebooks/01_data_profiling.ipynb
+jupyter nbconvert --to notebook --execute --inplace notebooks/02_data_cleaning.ipynb
+jupyter nbconvert --to notebook --execute --inplace notebooks/03_eda_and_insights.ipynb
+```
+
+> **Catatan:** Dockerfile menjalankan JupyterLab tanpa password/token untuk penggunaan lokal. Jangan pakai konfigurasi ini di server atau jaringan publik.
+
+### Opsi B - Virtualenv lokal
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+python src/download_data.py          # unduh dataset ke data/raw/
+jupyter lab                          # lalu jalankan notebook 01 -> 02 -> 03
+```
+
+Dengan `make` (opsional):
+
+```bash
+make setup   # buat .venv + pasang dependency
+make all     # data -> profiling -> cleaning -> eda
+```
+
+## Alur Pipeline
+
+| Langkah | Perintah | Masukan | Keluaran |
+|---|---|---|---|
+| 1. Unduh data | `python src/download_data.py` | API NASA POWER | `data/raw/cuaca_indonesia.parquet` |
+| 2. Profiling | `notebooks/01_data_profiling.ipynb` | `data/raw/*.parquet` | profil skema, baris, null, `SUMMARIZE` |
+| 3. Cleaning | `notebooks/02_data_cleaning.ipynb` | `data/raw/*.parquet` | `data/processed/dataset_bersih.parquet` |
+| 4. EDA & insight | `notebooks/03_eda_and_insights.ipynb` | `data/processed/*.parquet` | 6 figur di `output/figures/` + 5 insight |
+
+Notebook dirancang **dapat dieksekusi berurutan** dan **idempoten** (mengulang tidak mengubah hasil). Notebook menulis output ke `data/processed/` dan `output/figures/`, sehingga langkah berikutnya tidak perlu mengulang langkah sebelumnya.
+
+## Hasil dan Insight Utama
+
+Lima insight yang didukung analisis (detail di `notebooks/03_eda_and_insights.ipynb`):
+
+1. **Tren pemanasan.** Suhu nasional naik ~**+0,023 derajat C/tahun**; rata-rata 2001-2005 (25,70 derajat C) naik ke 2020-2024 (26,05 derajat C) = **+0,35 derajat C**. Semua 40 kota bertren positif; bulan terpanas terjadi pada 2023-2024 (El Nino).
+2. **Ketimpangan spasial.** Rentang suhu antar kota ~**14,5 derajat C**: Wamena 13,43 derajat C (dataran tinggi) hingga Tanjung Pinang 27,91 derajat C (pesisir/kepulauan).
+3. **Korelasi kunci.** `T2M`-`PS` +0,74, `T2M`-`RH2M` -0,64, `T2M`-solar +0,45; sebagian besar efek antar-lokasi (ketinggian) yang perlu diwaspadai sebagai *confounding*.
+4. **Pola musiman dan harian.** Curah hujan Desember **8,80 mm/hari** vs Agustus **3,81 mm/hari** (2,3x); suhu puncak pukul 13.00 (28,35 derajat C) dan terendah pukul 05.00 (23,83 derajat C), rentang ~4,5 derajat C.
+5. **Rekomendasi.** Kalender tanam mengikuti puncak hujan Desember-Januari; waspadai *heat stress* pukul Oktober-November; pakai laju +0,023 derajat C/tahun sebagai baseline adaptasi iklim; korelasi suhu-radiasi mendukung potensi PLTS.
+
+Enam visualisasi interaktif (Plotly): (1) tren deret waktu + *range slider*, (2) box plot distribusi suhu per kota, (3) heatmap korelasi, (4) treemap curah hujan per provinsi, (5) heatmap siklus jam x bulan, (6) peta spasial suhu/curah hujan. Figur HTML tersimpan di `output/figures/` dan juga tertanam di notebook.
+
+## Reproduksibilitas dan Lingkungan
+
+- **Docker:** `Dockerfile` berbasis `quay.io/jupyter/datascience-notebook` memasang seluruh dependency dari `requirements.txt`.
+- **`.dockerignore`:** mencegah data besar, `.venv`, dan `.git` ikut masuk ke image.
+- **`requirements.txt`:** `duckdb`, `jupyterlab`, `numpy`, `pandas`, `plotly`, `polars[pyarrow]`, `pyarrow`.
+- **`Makefile`:** menyediakan satu perintah untuk menjalankan seluruh pipeline (`make all`).
+- **Data:** tidak di-commit (lihat `.gitignore`); direproduksi lewat `src/download_data.py` dari API publik NASA POWER.
+
+## Pemeriksaan Otomatis
+
+Workflow `.github/workflows/lint_check.yml` berjalan pada setiap push/PR dan menjalankan:
+
+- `python -m compileall src` - memastikan skrip Python bebas error sintaks.
+- Validasi JSON seluruh notebook di `notebooks/`.
 
 ## Ringkasan Penilaian
 
-Nilai Tugas 1 berbobot 25% dari nilai akhir. Penilaian lengkap ada di dokumen spesifikasi tugas; ringkasannya sebagai berikut.
+Nilai Tugas 1 berbobot 25% dari nilai akhir. Ringkasan indikator:
 
 | Aspek | Bobot | Indikator utama |
 |---|:---:|---|
@@ -46,168 +158,16 @@ Nilai Tugas 1 berbobot 25% dari nilai akhir. Penilaian lengkap ada di dokumen sp
 | Visualisasi dan insight | 25% | Visualisasi interaktif informatif dan insight analitik yang didukung data. |
 | Reproduktivitas dan Docker | 15% | Dockerfile, dependency, dan instruksi eksekusi memungkinkan proyek dijalankan ulang. |
 
-Target kualitas tertinggi adalah analisis yang efisien, terdokumentasi, dapat direproduksi, dan memperlihatkan proses kerja konsisten sepanjang milestone; bukan hanya hasil akhir yang terlihat baik.
+## Kaitan dengan Materi Perkuliahan
 
-## Struktur Repository
-
-```text
-.
-├── .github/workflows/lint_check.yml
-├── data/README.md
-├── notebooks/
-│   ├── 01_data_profiling.ipynb
-│   ├── 02_data_cleaning.ipynb
-│   └── 03_eda_and_insights.ipynb
-├── output/figures/
-├── src/
-├── Dockerfile
-├── requirements.txt
-└── README.md
-```
-
-# Tugas 1 Analisis Big Data 2026
-
-## Persiapan GitHub
-
-### 1. Fork Repository Tugas
-
-Fork repository berikut ke akun GitHub masing-masing:
-
-https://github.com/UMM-GURU/tugas1-abd-2026.git
-
-Langkah-langkah:
-
-1. Login ke GitHub.
-2. Buka repository tugas.
-3. Klik tombol **Fork** di pojok kanan atas.
-4. Tunggu hingga GitHub membuat salinan repository ke akun Anda.
-
-Setelah selesai, Anda akan memiliki repository dengan alamat seperti:
-
-```text
-https://github.com/USERNAME-ANDA/tugas1-abd-2026.git
-```
-
----
-
-### 2. Clone Repository Hasil Fork
-
-Buka Terminal, Git Bash, atau Command Prompt lalu jalankan:
-
-```bash
-git clone https://github.com/USERNAME-ANDA/tugas1-abd-2026.git
-cd tugas1-abd-2026
-```
-
-Ganti `USERNAME-ANDA` dengan username GitHub Anda.
-
----
-
-## Menjalankan Project
-
-Pastikan Docker sudah terpasang pada komputer Anda.
-
-### Build Docker Image
-
-```bash
-docker build -t tugas1-bigdata .
-```
-
-### Jalankan Container
-
-```bash
-docker run --rm -p 8888:8888 -v "$(pwd)":/home/jovyan/work tugas1-bigdata
-```
-
-### Membuka JupyterLab
-
-Buka browser dan akses:
-
-http://localhost:8888/lab
-
-> **Catatan:** Konfigurasi Dockerfile menjalankan JupyterLab tanpa password atau token untuk penggunaan lokal. Jangan gunakan konfigurasi ini pada server atau jaringan publik.
-
----
-
-## Menyiapkan Dataset
-
-1. Letakkan dataset yang akan digunakan pada folder:
-
-```text
-data/raw/
-```
-
-2. Buka notebook profiling atau notebook yang digunakan.
-3. Sesuaikan nilai variabel `DATA_PATH` agar mengarah ke file dataset yang Anda gunakan.
-
-Contoh:
-
-```python
-DATA_PATH = "data/raw/nama_dataset.csv"
-```
-
----
-
-## Mengerjakan Tugas
-
-1. Baca seluruh instruksi yang terdapat pada notebook.
-2. Kerjakan setiap bagian sesuai perintah.
-3. Simpan perubahan secara berkala.
-
----
-
-## Commit Perubahan
-
-Setelah tugas selesai dikerjakan, simpan hasil pekerjaan ke Git menggunakan perintah berikut:
-
-```bash
-git add .
-git commit -m "Menyelesaikan Tugas 1 Analisis Big Data"
-```
-
-Anda dapat mengganti pesan commit sesuai kebutuhan.
-
----
-
-## Push ke Repository GitHub
-
-Kirim hasil pekerjaan ke repository GitHub milik Anda:
-
-```bash
-git push origin main
-```
-
-Apabila branch utama bernama `master`, gunakan:
-
-```bash
-git push origin master
-```
-
----
-
-## Verifikasi Pengumpulan
-
-1. Buka repository GitHub milik Anda.
-2. Pastikan file yang telah dikerjakan sudah muncul.
-3. Pastikan terdapat minimal satu commit hasil pekerjaan Anda.
-4. Salin URL repository Anda untuk keperluan penilaian jika diminta dosen.
-
-Contoh URL repository:
-
-```text
-https://github.com/USERNAME-ANDA/tugas1-abd-2026
-```
-
----
-
-## Menjalankan Project
-
-```bash
-docker build -t tugas1-bigdata .
-docker run --rm -p 8888:8888 -v "$(pwd)":/home/jovyan/work tugas1-bigdata
-```
-
-Buka JupyterLab pada `http://localhost:8888/lab`. Konfigurasi Dockerfile menjalankan JupyterLab tanpa password atau token untuk penggunaan lokal. Jangan gunakan konfigurasi ini pada server atau jaringan publik. Letakkan dataset pada `data/raw/`, lalu sesuaikan `DATA_PATH` di notebook profiling.
+| Materi | Pertemuan | Penerapan pada Tugas 1 |
+|---|:---:|---|
+| Polars dan lazy evaluation | 2 | Profiling dan transformasi dataset besar dengan `scan_parquet`, expressions, `group_by_dynamic`, `rolling_mean`. |
+| DuckDB dan format data | 3 | Query analitik serta profiling dengan `SUMMARIZE`, kuantil, `corr`, window `OVER`, dan `regr_slope`; memakai Parquet. |
+| Data quality dan cleaning | 4 | Penanganan nilai hilang, outlier, duplikasi, dan aturan validasi fisik pada notebook 02. |
+| EDA dan visualisasi | 5 | Enam visualisasi interaktif Plotly dan lima insight analitik. |
+| Time series | 6 | Tren jangka panjang, rata-rata bergerak, siklus musiman dan harian pada notebook 03. |
+| Streamlit dan Docker | 10-11 | Environment Docker terdokumentasi (dashboard Streamlit bersifat opsional). |
 
 ## Aturan Teknis
 
@@ -227,10 +187,14 @@ Buka JupyterLab pada `http://localhost:8888/lab`. Konfigurasi Dockerfile menjala
 
 ## AI Disclosure Statement
 
-Isi bagian ini sebelum pengumpulan akhir.
+> **Alat AI yang digunakan:** Command Code.
+>
+> **Bagian yang dibantu:** penyusunan skrip pengunduhan data `src/download_data.py`; penulisan dan debugging kode Polars/DuckDB pada notebook profiling dan cleaning; pembuatan visualisasi Plotly; penulisan draft dokumentasi `README.md` dan `data/README.md`; perbaikan error (mis. perubahan API `pl()` DuckDB, `min_periods` -> `min_samples` Polars, serta koreksi label waktu UTC -> LST).
+>
+> **Verifikasi yang dilakukan:** menjalankan ulang seluruh notebook dari nol dan memeriksa keluaran setiap cell; memverifikasi profil statistik dan rentang nilai agar sesuai batas fisis (mis. `T2MDEW <= T2M`, `0 <= RH2M <= 100`); memeriksa dokumentasi resmi NASA POWER, Polars, dan DuckDB; serta memastikan setiap temuan pada bagian insight dapat dijelaskan dan ditelusuri ke keluaran analisis.
 
-> Alat AI yang digunakan: [nama alat].
->
-> Bagian yang dibantu: [contoh: penjelasan error Polars atau review dokumentasi].
->
-> Verifikasi yang dilakukan: [contoh: menjalankan ulang kode, memeriksa dokumentasi resmi, dan memahami setiap cell].
+## Atribusi Data
+
+Data bersumber dari **NASA POWER Project** (Prediction Of Worldwide Energy Resources), yang memakai reanalisis **MERRA-2**. Sitasi yang disarankan:
+
+> NASA Langley Research Center (LaRC). *POWER Project Data Sets*. https://power.larc.nasa.gov/
