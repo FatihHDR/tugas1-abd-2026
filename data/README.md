@@ -9,7 +9,7 @@
 | Endpoint API | `https://power.larc.nasa.gov/api/temporal/hourly/point` |
 | Lisensi/ketentuan pakai | Data terbuka NASA; bebas digunakan untuk penelitian dan pendidikan. Cantumkan atribusi kepada *NASA POWER Project* ([kebijakan penggunaan](https://power.larc.nasa.gov/docs/)). |
 | Ukuran | **8.415.360 baris** (~190 MB Parquet) — memenuhi kriteria **> 1.000.000 baris** |
-| Periode data | 1 Januari 2001 – 31 Desember 2024 (waktu UTC) |
+| Periode data | 1 Januari 2001 – 31 Desember 2024 (waktu lokal / LST tiap kota) |
 | Unit analisis | Satu observasi cuaca per jam untuk satu kota |
 
 Nilai ini jauh melampaui batas minimal tugas. Karena data cuaca per jam punya
@@ -74,7 +74,7 @@ untuk analisis **temporal** (tren, musiman, siklus harian) sekaligus
 
 | Kolom | Tipe | Satuan | Keterangan |
 |---|---|---|---|
-| `waktu_utc` | Datetime | UTC | Timestamp observasi (UTC) |
+| `waktu_lokal` | Datetime | LST | Timestamp observasi (Local Standard Time kota tersebut) |
 | `T2M` | Float64 | °C | Suhu udara pada ketinggian 2 m |
 | `T2MDEW` | Float64 | °C | Titik embun pada ketinggian 2 m |
 | `RH2M` | Float64 | % | Kelembapan relatif pada 2 m |
@@ -125,16 +125,19 @@ https://power.larc.nasa.gov/api/temporal/hourly/point
 ## Checksum
 
 ```
-sha256  e274b1e5a7ea076afaada75ddbbeb952ae08b985f63c91334fdcd42cff9be651
+sha256  8da9dcbd6c434e16ac6bd9c3fcc4c320434f97a6f62a4b82fbc86bd4bb60debc
 ```
 
 ## Catatan Kualitas Data
 
 - Nilai penanda data hilang `-999` dari NASA POWER sudah dikonversi menjadi
   `null`; dataset bersih ini tidak mengandung nilai tersebut.
-- Timestamp disimpan dalam **UTC**. Untuk analisis siklus harian, gunakan
-  kolom `zona_waktu` dan `utc_offset_jam` agar waktu lokal setiap kota benar.
-- Setiap kombinasi `(kota, waktu_utc)` bersifat unik; tidak ada duplikasi.
+- Timestamp tersimpan dalam **Local Standard Time (LST)** masing-masing kota
+  (bukan UTC); API POWER mengembalikan `"time_standard": "LST"`. Kolom
+  `zona_waktu` (WIB/WITA/WIT) dan `utc_offset_jam` disertakan sebagai metadata.
+  Karena Indonesia tidak memakai DST, waktu lokal ini langsung dapat dipakai
+  untuk analisis siklus harian.
+- Setiap kombinasi `(kota, waktu_lokal)` bersifat unik; tidak ada duplikasi.
 - Titik koordinat mengikuti grid reanalisis MERRA-2, bukan stasiun
   pengamatan darat, sehingga nilai merepresentasikan rata-rata area sekitar.
 

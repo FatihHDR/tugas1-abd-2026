@@ -35,6 +35,10 @@ CHUNK_YEARS = 3
 MAX_WORKERS = 8
 FILL_VALUE = -900.0  # NASA POWER memakai -999.0 untuk data hilang
 
+# API POWER mengembalikan timestamp dalam Local Standard Time (LST) masing-masing
+# lokasi ("time_standard": "LST"), bukan UTC. Kolom waktu karena itu dinamai
+# "waktu_lokal" dan zona waktu tiap kota disimpan pada kolom "zona_waktu".
+
 # (kota, provinsi, latitude, longitude, zona_waktu, utc_offset_hours)
 CITIES: list[tuple[str, str, float, float, str, int]] = [
     ("Banda Aceh", "Aceh", 5.5483, 95.3238, "WIB", 7),
@@ -135,11 +139,11 @@ def fetch_chunk(
 
     return pl.DataFrame(
         {
-            "waktu_utc": timestamps,
+            "waktu_lokal": timestamps,
             **{name: list(parameter_data[name].values()) for name in PARAMETERS},
         }
     ).with_columns(
-        (pl.col("waktu_utc") + "00").str.strptime(pl.Datetime("us"), "%Y%m%d%H%M").alias("waktu_utc"),
+        (pl.col("waktu_lokal") + "00").str.strptime(pl.Datetime("us"), "%Y%m%d%H%M").alias("waktu_lokal"),
         *[
             pl.when(pl.col(name) <= FILL_VALUE)
             .then(None)
@@ -158,7 +162,7 @@ def download_city(city: tuple[str, str, float, float, str, int]) -> str:
         return f"{kota}: sudah ada, dilewati"
 
     frames = [fetch_chunk(lat, lon, s, e) for s, e in year_chunks(START_YEAR, END_YEAR)]
-    combined = pl.concat(frames, how="vertical").sort("waktu_utc").with_columns(
+    combined = pl.concat(frames, how="vertical").sort("waktu_lokal").with_columns(
         pl.lit(kota).alias("kota"),
         pl.lit(provinsi).alias("provinsi"),
         pl.lit(lat, dtype=pl.Float64).alias("latitude"),
